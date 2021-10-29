@@ -89,7 +89,7 @@ def neg_sampling_loss_and_gradient(
     y_hat -= sum([np.log(sigmoid(-outside_vectors[k].dot(center_word_vec))) for k in neg_sample_word_indices])
     loss = y_hat
     # dj/dvc = (1-sigmoid(uo*vc)) - k + sum_1_k(sigmoid(-uk*vc))
-    grad_outside_vec = 1 - sum([outside_vectors[j].dot(center_word_vec) for j in indices])
+    grad_center_vec = 1 - sum([outside_vectors[j].dot(center_word_vec) for j in indices])
     # dj/dU
     grad_outside_vecs = np.zeros_like(outside_vectors)
     for i in indices:
@@ -132,9 +132,9 @@ def skipgram(current_center_word, outside_words, word2ind,
     loss = 0.0
     grad_center_vecs = np.zeros(center_word_vectors.shape)
     grad_outside_vectors = np.zeros(outside_vectors.shape)
-
+    
     ### YOUR CODE HERE
-    for word in outside_words:
+    for index, word in enumerate(outside_words):
         center_word_vec = center_word_vectors[word2ind[current_center_word]]
         outside_word_idx = word2ind[word]
         tmp_loss, tmp_cent_grad, tmp_outside_grad = word2vec_loss_and_gradient(center_word_vec, outside_word_idx, outside_vectors, dataset)
@@ -199,10 +199,10 @@ def test_word2vec_basic():
     dummy_vectors = normalize_rows(np.random.randn(10, 3))
     dummy_tokens = dict([("a", 0), ("b", 1), ("c", 2), ("d", 3), ("e", 4)])
 
-    print("==== Gradient check for skip-gram with naive_softmax_loss_and_gradient ====")
-    gradcheck_naive(lambda vec: word2vec_sgd_wrapper(
-        skipgram, dummy_tokens, vec, dataset, 5, naive_softmax_loss_and_gradient),
-        dummy_vectors, "naive_softmax_loss_and_gradient Gradient")
+    # print("==== Gradient check for skip-gram with naive_softmax_loss_and_gradient ====")
+    # gradcheck_naive(lambda vec: word2vec_sgd_wrapper(
+    #     skipgram, dummy_tokens, vec, dataset, 5, naive_softmax_loss_and_gradient),
+    #     dummy_vectors, "naive_softmax_loss_and_gradient Gradient")
 
     print("==== Gradient check for skip-gram with neg_sampling_loss_and_gradient ====")
     gradcheck_naive(lambda vec: word2vec_sgd_wrapper(
