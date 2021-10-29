@@ -38,7 +38,20 @@ def naive_softmax_loss_and_gradient(
     """
 
     ### YOUR CODE HERE
-    raise NotImplementedError
+    
+    x = outside_vectors[outside_word_idx].dot(center_word_vec)
+    print(f"OG X: {x}")
+    softmax_x = softmax(x)
+    print(f"SOFT: {softmax_x}")
+    # -log(softmax(x))
+    loss = -np.log(softmax_x)
+    # U(Y`-Y)
+    grad_center_vec = outside_vectors.dot((softmax_x-outside_vectors[outside_word_idx]))
+    # 2 cases, w=o, w!=o
+    if outside_word_idx == np.argmax(softmax_x):
+        grad_outside_vecs = center_word_vec.dot(softmax_x-1)
+    else:
+        grad_outside_vecs = center_word_vec.dot(softmax_x)
     ### END YOUR CODE
 
     return loss, grad_center_vec, grad_outside_vecs
@@ -71,7 +84,16 @@ def neg_sampling_loss_and_gradient(
     indices = [outside_word_idx] + neg_sample_word_indices
 
     ### YOUR CODE HERE
-    raise NotImplementedError
+    # Y` = -log(sigmoid(uo*vc)) - sum_1_k(log(sigmoid(-uk*vc)))
+    y_hat = -np.log(sigmoid(outside_vectors[outside_word_idx].dot(center_word_vec)))
+    y_hat -= sum([np.log(sigmoid(-outside_vectors[k].dot(center_word_vec))) for k in neg_sample_word_indices])
+    loss = y_hat
+    # dj/dvc = (1-sigmoid(uo*vc)) - k + sum_1_k(sigmoid(-uk*vc))
+    grad_outside_vec = 1 - sum([outside_vectors[j].dot(center_word_vec) for j in indices])
+    # dj/dU
+    grad_outside_vecs = np.zeros_like(outside_vectors)
+    for i in indices:
+        grad_outside_vecs[i] = 1-sigmoid(outside_vectors[i].dot(center_word_vec))
     ### END YOUR CODE
 
     return loss, grad_center_vec, grad_outside_vecs
@@ -112,7 +134,19 @@ def skipgram(current_center_word, outside_words, word2ind,
     grad_outside_vectors = np.zeros(outside_vectors.shape)
 
     ### YOUR CODE HERE
-    raise NotImplementedError
+    for word in outside_words:
+        center_word_vec = center_word_vectors[word2ind[current_center_word]]
+        outside_word_idx = word2ind[word]
+        tmp_loss, tmp_cent_grad, tmp_outside_grad = word2vec_loss_and_gradient(center_word_vec, outside_word_idx, outside_vectors, dataset)
+        loss += tmp_loss
+        print("DATA")
+        print(f"tmp CENT GRAD: {tmp_cent_grad}")
+        print(f"CENT GRAD: {grad_center_vecs}")
+        print(f"tmp out grad: {tmp_outside_grad}")
+        print(f" out grad: {grad_outside_vectors}")
+
+        grad_center_vecs += tmp_cent_grad
+        grad_outside_vectors += tmp_outside_grad
     ### END YOUR CODE
 
     return loss, grad_center_vecs, grad_outside_vectors
