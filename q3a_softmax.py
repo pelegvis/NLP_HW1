@@ -21,6 +21,7 @@ def softmax(x):
         e_x = np.exp(tmp)
         print(e_x)
         x = e_x / e_x.sum(axis=1)
+        print(x)
     else:
         # Vector
         e_x = np.exp(x - np.max(x))
