@@ -87,7 +87,8 @@ def sgd(f, x0, step, iterations, postprocessing=None, use_saved=False,
 
         loss = None
         ### YOUR CODE HERE
-        raise NotImplementedError
+        loss, df_x = f(x)
+        x = x - np.dot(step, df_x)
         ### END YOUR CODE
 
         x = postprocessing(x)
